@@ -1,0 +1,61 @@
+.add-address-btn {
+  background-color: #2563eb;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.add-address-btn:hover {
+  background-color: #1d4ed8;
+}
+
+.address-container {
+  max-width: 850px;
+  margin: 30px auto;
+  padding: 25px;
+}
+
+.add-address-btn {
+  background: #2563eb;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.address-form,
+.saved-address {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.address-form input:not([type="checkbox"]),
+.address-form select {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.saved-address-list {
+  margin-top: 25px;
+}
+
+.success-message {
+  color: green;
+}
+
+.error-message {
+  color: red;
+}
