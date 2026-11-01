@@ -1,7 +1,8 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { logoutUser } from "../features/auth/authSlice";
-import "./Profile.css";
+import { logoutUser } from "../../features/auth/authSlice";
+
+import styles from "./Profile.module.css";
 
 function Profile() {
   const dispatch = useDispatch();
@@ -17,11 +18,11 @@ function Profile() {
   };
 
   return (
-    <div className="profile-layout">
+    <div className={styles.profileLayout}>
       <aside className="profile-sidebar">
         <h2>My Profile</h2>
 
-        <nav className="profile-sidebar-menu">
+        <nav className={styles.profileSidebarMenu}>
           <NavLink to="/profile/account">
             <span>👤</span> Account
           </NavLink>
@@ -38,16 +39,16 @@ function Profile() {
             <span>📦</span> My Orders
           </NavLink>
 
-          <button
+        {/*   <button
             className="profile-logout"
             onClick={handleLogout}
           >
             <span>🚪</span> Logout
-          </button>
+          </button> */}
         </nav>
       </aside>
 
-      <main className="profile-content">
+      <main className={styles.profileContent}>
         <Outlet />
       </main>
     </div>

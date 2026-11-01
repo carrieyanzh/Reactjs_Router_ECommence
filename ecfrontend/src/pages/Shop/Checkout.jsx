@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
-
-import { addOrder } from "../features/orders/ordersSlice";
-import { clearCart } from "../features/cart/cartSlice";
+import { addOrder } from "../../features/orders/ordersSlice";
+import { clearCart } from "../../features/cart/cartSlice";
+import styles from "./Shop.module.css";
 
 function Checkout() {
   const dispatch = useDispatch();
@@ -59,15 +59,14 @@ function Checkout() {
   }
 
   return (
-    <div className="page">
+    <div className={styles.page}>
       <h1>Checkout</h1>
 
-      <div className="checkout-container">
+      <div className={styles.checkoutContainer}>
         <form onSubmit={handleCheckout}>
           <h2>Customer Information</h2>
 
-          <input
-            type="text"
+          <input type="text"
             name="name"
             placeholder="Full Name"
             value={customer.name}
@@ -89,11 +88,11 @@ function Checkout() {
             onChange={handleChange}
             required />
 
-          <div className="checkout-summary">
+          <div className={styles.checkoutSummary}>
             <h3>Order Total: ${total.toFixed(2)}</h3>
           </div>
 
-          <button type="submit" className="primary-button">
+          <button type="submit" className={styles.primaryButton}>
             Confirm Order
           </button>
         </form>

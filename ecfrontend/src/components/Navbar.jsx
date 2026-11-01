@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import "./Navbar.css";
 
-// Adjust this import to your actual authSlice.js location
+
+import styles from './Navbar.module.css'; 
+
 import { logoutUser } from "../features/auth/authSlice";
 
 function Navbar() {
@@ -39,12 +40,12 @@ function Navbar() {
   };
 
   return (
-    <header className="navbar">
-      <Link to="/" className="logo">
-        YanTech Lab<span>.</span>
+    <header className={styles.navbar}>
+      <Link to="/" className={styles.logo}>
+        YanTech Lab
       </Link>
 
-      <nav className="nav-menu">
+      <nav className={styles.navMenu}>
         <NavLink to="/" end className={getNavClass}>
           Home
         </NavLink>
@@ -62,49 +63,24 @@ function Navbar() {
         </NavLink>
       </nav>
 
-      <div className="nav-actions">
+      <div className={styles.navActions}>
         {isAuthenticated && user ? (
-          <div className="profile-dropdown">
+          <div className={styles.profileDropdown}>
             <button
-              className="profile-trigger"
+              className={styles.profileTrigger}
               onClick={() => setShowUserMenu(!showUserMenu)}
             >
               {user.name || user.username} ▼
             </button>
 
             {showUserMenu  && (
-              <div className="profile-menu">
+              <div className={styles.profileMenu}>
                 <Link
                   to="/profile/account"
-                  onClick={() => setShowUserMenu(false)}
-                >
+                  onClick={() => setShowUserMenu(false)}  >
                   My Profile
                 </Link>
-
-                <Link
-                  to="/profile/address"
-                  onClick={() => setShowUserMenu(false)}
-                >
-                  My Addresses
-                </Link>
-
-                <Link
-                  to="/profile/orders"               
-                   onClick={() => setShowUserMenu(false)} >
-                  My Orders
-                </Link>
-
-
-
-                <Link
-                  to="/profile/wishlist"
-                  onClick={() => setShowUserMenu(false)}
-                >
-                  My Wishlist
-                </Link>
-
                 <hr />
-
                 <button onClick={handleLogout}>
                   Logout
                 </button>
@@ -112,12 +88,12 @@ function Navbar() {
             )}
           </div>
         ) : (
-          <Link to="/login" className="login-link">
+          <Link to="/login" className={styles.loginLink}>
             Login
           </Link>
         )}
 
-        <Link to="/cart" className="cart-button">
+        <Link to="/cart" className={styles.cartButton}>
           🛒 Cart ({cartCount})
         </Link>
       </div>

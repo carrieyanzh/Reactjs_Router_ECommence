@@ -2,7 +2,8 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
-import { fetchCategories } from "../features/categories/categoriesSlice";
+import { fetchCategories } from "./../../features/categories/categoriesSlice";
+import styles from "./Shop.module.css";
 
 export default function Categories() {
   const dispatch = useDispatch();
@@ -20,14 +21,14 @@ export default function Categories() {
   if (error) return <p>Unable to load categories: {error}</p>;
 
   return (
-    <div className="page">
+    <div className={styles.page}>
       <h1>Shop by Categories</h1>
       <p>Explore our product collections.</p>
 
-      <div className="category-grid">
+      <div className={styles.categoryGrid}>
         {items.map((category) => (
-          <div className="category-card" key={category.id}>
-            <div className="category-icon">
+          <div className={styles.categoryCard} key={category.id}>
+            <div className={styles.categoryIcon}>
               {category.emoji}
             </div>
 
@@ -38,8 +39,7 @@ export default function Categories() {
 
             <Link
               to={`/shop?categoryId=${category.id}`}
-              className="primary-button"
-            >
+              className={styles.primaryButton}  >
               Explore →
             </Link>
           </div>

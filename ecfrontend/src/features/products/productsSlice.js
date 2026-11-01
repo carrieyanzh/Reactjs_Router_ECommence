@@ -1,12 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../api/api";
 
-// Fetch products from backend
 export const fetchProducts = createAsyncThunk(
   "products/fetchProducts",
   async (categoryId, { rejectWithValue }) => {
     try {
-      const response = await api.get("/products", {
+      const response = await api.get("/api/products", {
         params: categoryId ? { categoryId } : {},
       });
 

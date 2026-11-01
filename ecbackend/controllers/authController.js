@@ -1,91 +1,202 @@
+import db from "../db.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import db from "../db.js"; // Loads the working root db instance
 
-// 1. LOGIN CONTROLLER
-export const login = (req, res) => {
-  console.log("1. LOGIN API CALLED");
-  const { email, password } = req.body;
-  
-  console.log("2. Searching for email:", email);
+const isProduction = process.env.NODE_ENV === 'production';
 
-  db.get(
-    "SELECT * FROM users WHERE email = ?",
-    [email],
-    async (err, user) => {
-      console.log("3. Database query callback finished execution.");
+const getRowObject = (result) => {
+    if (!result || !result.rows || result.rows.length === 0) return null;
+    return result.rows[0]; // 👈 FIX: Must target the first index to get the actual user record
+};
 
-      if (err) {
-        console.error("-> SQLITE ERROR DETAILS:", err.message);
-        return res.status(500).json({ message: "Database error" });
-      }
+export const register = async (req, res) => {
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) {
+        return res.status(400).json({ message: "All fields are required" });
+    }
 
-      if (!user) {
-        console.log("-> USER NOT FOUND IN DATABASE:", email);
-        return res.status(401).json({ message: "Invalid email or password" });
-      }
+    try {
+        const existingCheck = await db.execute({
+            sql: "SELECT id FROM users WHERE email = ?",
+            args: [email]
+        });
 
-      console.log("-> USER FOUND successfully. Comparing passwords...");
-
-      try {
-        const passwordMatch = await bcrypt.compare(password, user.password);
-        console.log("-> Password matching calculation result:", passwordMatch);
-
-        if (!passwordMatch) {
-          return res.status(401).json({ message: "Invalid email or password" });
+        if (existingCheck.rows.length > 0) {
+            return res.status(400).json({ message: "Email already registered" });
         }
 
+        const hashedPassword = await bcrypt.hash(password, 12);
+        await db.execute({
+            sql: "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
+            args: [name, email, hashedPassword]
+        });
+
+        res.status(201).json({ message: "User registered successfully" });
+
+    } catch (error) {
+        console.error("Registration error:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+export const login = async (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    try {
+        const result = await db.execute({
+            sql: "SELECT id, name, email, password FROM users WHERE email = ?",
+            args: [email]
+        });
+
+        const user = getRowObject(result);
+        if (!user) {
+            return res.status(401).json({ message: "Invalid email or password" });
+        }
+
+        // Support both object properties and raw index fallbacks
+        const dbPassword = user.password !== undefined ? user.password : user[3];
+        const dbId = user.id !== undefined ? user.id : user[0];
+        const dbName = user.name !== undefined ? user.name : user[1];
+        const dbEmail = user.email !== undefined ? user.email : user[2];
+
+        if (!dbPassword) {
+            return res.status(500).json({ message: "Database schema error: password field column missing" });
+        }
+
+        const isPasswordCorrect = await bcrypt.compare(password, dbPassword);
+        if (!isPasswordCorrect) {
+            return res.status(401).json({ message: "Invalid email or password" });
+        }
+        
         const token = jwt.sign(
-          { id: user.id },
-          process.env.JWT_SECRET,
-          { expiresIn: "1d" }
+            { id: dbId, email: dbEmail },
+            process.env.JWT_SECRET || "fallback_secret",
+            { expiresIn: process.env.JWT_EXPIRES_IN || "1d" }
         );
 
-        res.cookie("token", token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          maxAge: 86400000,
-          path: "/"
-        });
-
-        console.log("-> JWT Cookie issued. Sending success payload.");
+      
+        // Send confirmation data pack safely back to your React app instance
         return res.json({
-          message: "Login successful",
-          user: { id: user.id, name: user.name, email: user.email }
+            message: "Logged in successfully",
+            token: token, // 👈 important
+            user: { id: dbId, name: dbName, email: dbEmail }
         });
-      } catch (error) {
-        console.error("-> Bcrypt comparison error layout:", error);
-        return res.status(500).json({ message: "Login failed" });
-      }
+
+    } catch (error) {
+        console.error("Login error:", error);
+        res.status(500).json({ message: "Internal server error during login" });
     }
-  );
 };
 
-// 2. GET CURRENT USER CONTROLLER (Restored this missing function)
-export const getCurrentUser = (req, res) => {
-  db.get(
-    "SELECT id, name, email FROM users WHERE id = ?",
-    [req.user.id],
-    (err, user) => {
-      if (err) {
-        return res.status(500).json({ message: "Database error" });
-      }
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      return res.json({ user });
+
+export const getCurrentUser = async (req, res) => {
+    try {
+        const result = await db.execute({
+            sql: "SELECT id, name, email FROM users WHERE id = ?",
+            args: [req.user.id]
+        });
+
+        const user = getRowObject(result);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const dbId = user.id !== undefined ? user.id : user[0];
+        const dbName = user.name !== undefined ? user.name : user[1];
+        const dbEmail = user.email !== undefined ? user.email : user[2];
+        
+        return res.json({ 
+            user: { id: dbId, name: dbName, email: dbEmail } 
+        });
+
+    } catch (error) {
+        console.error("Get current user error:", error);
+        res.status(500).json({ message: "Internal server error retrieving user" });
     }
-  );
 };
 
-// 3. LOGOUT CONTROLLER
-export const logout = (req, res) => {
-  res.clearCookie("token", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-  });
-  return res.json({ message: "Logout successful" });
+export const logout = async (req, res) => {
+    // Completely wipe the token cookie out of storage upon requesting an exit route action
+    res.clearCookie('token', {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
+        path: '/'
+    });
+    return res.json({ message: "Logged out successfully" });
+};
+
+
+export const registerUser = async (req, res) => {
+  const { name, email, password } = req.body;
+
+  // 1. Validate input
+  if (!name || !email || !password) {
+    return res.status(400).json({
+      message: "All fields are required"
+    });
+  }
+
+  if (password.length < 8) {
+    return res.status(400).json({
+      message: "Password must be at least 8 characters"
+    });
+  }
+
+  const cleanName = name.trim();
+  const cleanEmail = email.trim().toLowerCase();
+
+  try {
+    // 2. Check whether email already exists using modern .execute()
+    const existingCheck = await db.execute({
+      sql: "SELECT id FROM users WHERE email = ?",
+      args: [cleanEmail]
+    });
+
+    if (existingCheck.rows.length > 0) {
+      return res.status(409).json({
+        message: "Email already registered"
+      });
+    }
+
+    // 3. Hash password
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // 4. Insert new user using modern .execute()
+    const result = await db.execute({
+      sql: `INSERT INTO users (name, email, password) VALUES (?, ?, ?)`,
+      args: [cleanName, cleanEmail, hashedPassword]
+    });
+
+    // Extract the new ID safely depending on how your db client formats metadata
+    
+    let lastID = result.lastInsertRowid !== undefined ? result.lastInsertRowid : null;
+    if (typeof lastID === 'bigint') {
+        lastID = Number(lastID); // 👈 Convert BigInt to standard JavaScript number safely
+    }
+    
+    // 5. Return successful response
+    return res.status(201).json({
+      message: "Account created successfully",
+      user: {
+        id: lastID,
+        name: cleanName,
+        email: cleanEmail
+      }
+    });
+
+
+
+
+
+
+  } catch (error) {
+    console.error("❌ REGISTRATION SERVER ERROR:", error);
+    return res.status(500).json({
+      message: "Internal server error during registration"
+    });
+  }
 };

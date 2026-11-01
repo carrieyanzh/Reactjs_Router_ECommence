@@ -1,25 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect  } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
-import { loginUser } from "../features/auth/authSlice";
+import { loginUser } from "../../features/auth/authSlice";
 import "./Login.css";
 
 function Login() {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
-  const { status, error } = useSelector((state) => state.auth);
-
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState("");  
 
+  const dispatch = useDispatch();
+  const navigate = useNavigate(); 
+
+  const { status, error, isAuthenticated  } = useSelector((state) => state.auth);
+  
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/"); // 🚀 Send to Main Screen/Home page
+    }
+  }, [isAuthenticated, navigate]);
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      await dispatch(loginUser({ email, password })).unwrap();
-
-      navigate("/profile");
+    try {                     
+      const result = await dispatch(loginUser({ email, password }));
+      if (result.meta.requestStatus === "fulfilled") {
+        navigate("/"); // 🚀 Go to main screen
+      }
+      //navigate("/profile");
     } catch (err) {
       console.error(err);
     }

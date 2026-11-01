@@ -1,25 +1,27 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Home from "./pages/Home";
-import Shop from "./pages/Shop";
-import Login from "./pages/Login";
-import Profile from "./pages/Profile";
-import Account from "./pages/Account";
-import Address from "./pages/Address";
-import Wishlist from "./pages/Wishlist";
-import ProductDetails from "./pages/ProductDetails";
-import ProfileOrders from "./pages/ProfileOrders";
-import Categories from "./pages/Categories";
-import Cart from "./pages/Cart";
-import Checkout from "./pages/Checkout";
-import Register from "./pages/Register";
-import Orders from "./pages/Orders";
+import Home from "./pages/Home/Home";
+import Shop from "./pages/Shop/Shop";
+import Login from "./pages/Login/Login";
+import Profile from "./pages/Profiles/Profile";
+import Account from "./pages/Profiles/Account";
+import Address from "./pages/Profiles/Address";
+import Wishlist from "./pages/Profiles/Wishlist";
+import ProductDetails from "./pages/Shop/ProductDetails";
+import ProfileOrders from "./pages/Profiles/ProfileOrders";
+import Categories from "./pages/Shop/Categories";
+import Cart from "./pages/Shop/Cart";
+import Checkout from "./pages/Shop/Checkout";
+import Register from "./pages/Login/Register";
+import Orders from "./pages/Shop/Orders";
 
 import AuthInitializer from "./components/AuthInitializer";
 
+import axios from 'axios';
+axios.defaults.withCredentials = true;
 
 export default function App() {
   return (
@@ -36,6 +38,7 @@ export default function App() {
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/register" element={<Register />} />
+          
           <Route path="/orders"   element={ <ProtectedRoute>
                                     <Orders />
                                   </ProtectedRoute>  }/>

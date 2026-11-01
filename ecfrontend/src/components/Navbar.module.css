@@ -1,0 +1,126 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 5%;
+  background: #ffffff;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.logo {
+  font-size: 25px;
+  font-weight: bold;
+  text-decoration: none;
+  color: #333333;
+}
+
+.logo span {
+  color: #ff8a3d;
+}
+
+.profileDropdown {
+  position: relative;
+}
+
+.profileTrigger {
+   background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;         /* Increased from 15px to match other links */
+  font-weight: 500;         /* Cleaner, medium weight */
+  color: #333333;
+  transition: color 0.2s ease;
+}
+
+.profileTrigger:hover {
+  color: #3dff81;          /* Adds interactive hover behavior */
+}
+.profileMenu {
+  position: absolute;
+  top: 35px;
+  right: 0;
+  width: 190px;
+  background: white;
+  border: 1px solid #eeeeee;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  padding: 8px 0;
+}
+
+.profileMenu a,
+.profileMenu button {
+  display: block;
+  width: 100%;
+  padding: 11px 16px;
+  text-align: left;
+  text-decoration: none;
+  color: #444444;
+  background: white;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.profileMenu a:hover,
+.profileMenu button:hover {
+  background: #fff3eb;
+  color: #ff8a3d;
+}
+
+.profileMenu hr {
+  border: none;
+  border-top: 1px solid #eeeeee;
+  margin: 6px 0;
+}
+
+
+.navMenu,
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.navMenu a,
+.navActions a,
+.cartButton {
+  text-decoration: none;
+  color: #444444;   
+  font-size: 18px;         /* Increased base size for much better readability */
+  font-weight: 500;         /* Gives links a more intentional visual presence */
+  letter-spacing: 0.2px;   /* Subtle spacing to polish readability */
+  transition: color 0.2s ease;
+}
+
+.navMenu a:hover,
+.navActions a:hover,
+.cartButton:hover {
+  color: #ff8a3d;          /* Clean hover state using your primary accent color */
+}
+
+.cartButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;                 /* 图标和文字/数字之间的间距 */
+  padding: 10px 20px;       /* 按钮内边距，让它有上下左右的呼吸空间 */
+  background: #2ecc71;      /* 绿色背景（可替换为你 Explore 按钮的具体绿色，如 #4caf50） */
+  color: #ffffff !important; /* 将文字和数字强制改为白色，确保在绿色背景上清晰可见 */
+  border-radius: 8px;       /* 按钮圆角，让它看起来很精致 */
+  text-decoration: none;
+  font-weight: 500;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.cartButton:hover {
+  background: #27ae60;      /* 悬停时绿色稍微变深 */
+  transform: translateY(-1px); /* 轻微上浮动效 */
+}
+
+.cartButton img,
+.cartButton svg {
+  filter: brightness(0) invert(1); /* 如果你的购物车图标是黑色的图片，这行代码能把它变成白色 */
+  width: 18px;  /* 限制图标大小 */
+  height: 18px;
+}

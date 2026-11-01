@@ -42,7 +42,7 @@ e-commence_backend_frontend/
 - Order history
 - SQLite database
 
-
+'''text
 e-commence_backend_frontend/
 │
 ├── frontend/
@@ -85,4 +85,15 @@ e-commence_backend_frontend/
 └── README.md
 =======
 # Reactjs_Router_ECommence
->>>>>>> c51c1113922bd5995566ec5f7e3347a14f84b71c
+'''
+前端登录 ➔ 后端返回明文 Token ➔ 前端存入 LocalStorage ➔ 后续任意请求通过拦截器自动带上 Authorization Header ➔ 后端中间件从 Header 完美解析成功。
+
+Instead, Redux Toolkit internally catches everything and returns a special promise object containing a meta property:
+• fulfilled: The network request succeeded, your credentials matched, and the user successfully logged in.
+• rejected: The network request failed (e.g., wrong password, wrong email, server down).
+By checking result.meta.requestStatus === "fulfilled", you are guaranteeing that the user is only redirected to the home screen if the server actually confirmed their login details. If they enter a wrong password, it will stay on the login page and show the text error safely.
+
+
+取而代之的是，dispatch 动作执行完毕后，会返回一个特殊的 Promise 结果对象，里面包含了 meta.requestStatus 状态属性：
+• fulfilled（已兑现）：代表网络请求成功，账号密码完全匹配，登录成功。
+• rejected（已拒绝）：代表请求失败（可能密码错了、邮箱不存在或服务器宕机）。

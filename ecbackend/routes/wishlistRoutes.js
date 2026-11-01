@@ -1,19 +1,17 @@
-const express = require("express");
-const router = express.Router();
+import express from "express";
 
-const {
+import {
   getWishlist,
   addToWishlist,
   removeFromWishlist
-} = require("../controllers/wishlistController");
+} from "../controllers/wishlistController.js";
 
-const authenticateToken = require("../middleware/authMiddleware");
+import authenticateToken from "../middleware/authMiddleware.js";
 
-// All wishlist operations require login
+const router = express.Router();
+
 router.get("/", authenticateToken, getWishlist);
-
 router.post("/", authenticateToken, addToWishlist);
-
 router.delete("/:productId", authenticateToken, removeFromWishlist);
 
-module.exports = router;
+export default router;

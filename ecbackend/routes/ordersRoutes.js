@@ -1,15 +1,22 @@
 import express from "express";
 
+import {
+  createOrder,
+  getAllOrders,
+  getMyOrders,
+} from "../controllers/ordersController.js";
+
+//import { authenticateToken } from "../middleware/authMiddleware.js";
+import authenticateToken from "../middleware/authMiddleware.js";
 const router = express.Router();
 
-// GET all orders
-router.get("/", (req, res) => {
-  res.json({ message: "Get all orders" });
-});
+// Create a new order
+router.post("/", authenticateToken, createOrder);
 
-// POST create order
-router.post("/", (req, res) => {
-  res.json({ message: "Create order" });
-});
+// Get all orders
+router.get("/", authenticateToken, getAllOrders);
+
+// Get orders belonging to the logged-in user
+router.get("/my-orders", authenticateToken, getMyOrders);
 
 export default router;

@@ -1,4 +1,4 @@
-import db from "./database/db.js";
+import db from "../db.js";
 
 db.all(
   "SELECT name, sql FROM sqlite_master WHERE type = 'table'",

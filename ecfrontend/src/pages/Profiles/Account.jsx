@@ -1,4 +1,5 @@
 import { useSelector } from "react-redux";
+import styles from "./Profile.module.css";
 
 function Account() {
   const user = useSelector((state) => state.auth.user);
@@ -7,7 +8,7 @@ function Account() {
     <div>
       <h2>Account Information</h2>
 
-      <div className="account-details">
+      <div className={styles.accountDetails}>
         <p><strong>Name:</strong> {user?.name}</p>
         <p><strong>Email:</strong> {user?.email}</p>
         {/* <p><strong>User ID:</strong> {user?.id}</p> */}
