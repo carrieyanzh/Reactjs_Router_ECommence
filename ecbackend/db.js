@@ -1,31 +1,53 @@
-import { createClient } from "@libsql/client";
-import path from "path";
-import { fileURLToPath } from "url";
-import dotenv from "dotenv"; 
+import axios from "axios";
 
-dotenv.config(); 
+// 1. 从环境变量载入我们在 Render 面板配置的 Cloudflare 凭证
+const accountId = process.env.CF_ACCOUNT_ID;
+const databaseId = process.env.CF_DATABASE_ID;
+const apiToken = process.env.CF_API_TOKEN;
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename); 
-
-let dbOptions = {};
-
-// Smart Detection: If a cloud Auth Token exists, connect to Turso Cloud
-if (process.env.TURSO_AUTH_TOKEN) {
-  console.log("☁️  SERVER IS CONNECTING TO TURSO CLOUD ROUTER");
-  dbOptions = {
-    url: process.env.TURSO_DATABASE_URL,
-    authToken: process.env.TURSO_AUTH_TOKEN,
-  };
+// 检查变量是否正确加载
+if (!accountId || !databaseId || !apiToken) {
+  console.error("❌ [D1 CONFIG ERROR] Cloudflare 环境变量缺失，请检查 Render 面板配置！");
 } else {
-  // If no token exists, fall back to your local SQLite file
-  const localDatabasePath = path.resolve(__dirname, "database", "brightcart.db");
-  console.log("💻 SERVER IS LOADING LOCAL SQLITE FILE:", localDatabasePath);
-  dbOptions = {
-    url: `file:${localDatabasePath}`,
-  };
+  console.log("✅ [D1 CONFIG] Cloudflare D1 远程数据库服务初始化成功。");
 }
 
-const db = createClient(dbOptions);
+/**
+ * 核心数据库执行函数，完美平替本地 sqlite 的执行模式
+ * @param {string} sql - 需要执行的 SQL 语句 (例如 "SELECT * FROM products WHERE id = ?")
+ * @param {Array} params - 对应的参数数组 (例如)
+ * @returns {Promise<Array>} 返回查询结果数组
+ */
+export const query = async (sql, params = []) => {
+  const url = `https://cloudflare.com{accountId}/d1/database/${databaseId}/query`;
 
-export default db;
+  try {
+    const response = await axios.post(
+      url,
+      {
+        sql: sql,
+        params: params,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${apiToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (response.data && response.data.success) {
+      // D1 返回的格式中，结果存储在 result[0].results 中
+      const resultData = response.data.result[0];
+      return resultData.results || [];
+    } else {
+      throw new Error(response.data?.errors?.[0]?.message || "D1 远程查询失败");
+    }
+  } catch (error) {
+    console.error("❌ [D1 Query Error]:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// 预留一个兼容某些老代码的默认导出
+export default { query };
