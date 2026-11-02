@@ -43,7 +43,7 @@ function Address() {
 
     const handleSubmit = async (e) => {
     e.preventDefault();
-    const formEl = e.target; // 1. Save reference immediately before async calls
+    const formEl = e.target;
     const formData = new FormData(formEl);
 
     const address = {
@@ -62,6 +62,7 @@ function Address() {
 
     try {
       if (editingAddress) {
+        console.log("Targeting URL:", `/api/addresses/${editingAddress.id}`);
         await api.put(`/api/addresses/${editingAddress.id}`, address);
         setMessage("Address updated successfully!");
       } else {
@@ -115,7 +116,7 @@ function Address() {
       
       {/* Mutually exclusive rendering blocks ensure only one tracking message shows at a time */}
       {message && <p className={styles.successMessage} style={{ color: "green" }}>{message}</p>}
-      {error && <p className="error-message" style={{ color: "red" }}>{error}</p>}
+      {error && <p className={styles.errorMessage}  style={{ color: "red" }}>{error}</p>}
       
       <button
         className={styles.addAddressBtn}

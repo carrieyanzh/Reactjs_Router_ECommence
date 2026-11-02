@@ -187,12 +187,6 @@ export const registerUser = async (req, res) => {
         email: cleanEmail
       }
     });
-
-
-
-
-
-
   } catch (error) {
     console.error("❌ REGISTRATION SERVER ERROR:", error);
     return res.status(500).json({

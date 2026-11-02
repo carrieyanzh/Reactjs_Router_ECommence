@@ -3,15 +3,17 @@ import { Link } from "react-router-dom";
 import styles from "./Shop.module.css";
 
 import {
-  increaseQuantity,
-  decreaseQuantity,
-  removeFromCart,
+  updateCartQuantityAsync,
+  removeFromCartAsync,
 } from "../../features/cart/cartSlice";
 
 function Cart() {
   const dispatch = useDispatch();
   const items = useSelector((state) => state.cart.items);
-  const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const total = items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
 
   return (
     <div className={styles.page}>
@@ -29,22 +31,48 @@ function Cart() {
           {items.map((item) => (
             <div className={styles.cartItem} key={item.id}>
               <div>
-                <h3>{item.emoji} {item.name}</h3>
+                <h3>
+                  {item.emoji} {item.name}
+                </h3>
                 <p>Price: ${item.price}</p>
               </div>
 
               <div className={styles.quantityControls}>
-                <button onClick={() => dispatch(decreaseQuantity(item.id))} >
+                <button
+                  onClick={() => {
+                    if (item.quantity > 1) {
+                      dispatch(
+                        updateCartQuantityAsync({
+                          id: item.id,
+                          quantity: item.quantity - 1,
+                        }),
+                      );
+                    } else {
+                      dispatch(removeFromCartAsync(item.id));
+                    }
+                  }}
+                >
                   -
                 </button>
                 <span>{item.quantity}</span>
-                <button onClick={() => dispatch(increaseQuantity(item.id))} >
+                <button
+                  onClick={() =>
+                    dispatch(
+                      updateCartQuantityAsync({
+                        id: item.id,
+                        quantity: item.quantity + 1,
+                      }),
+                    )
+                  }
+                >
                   +
                 </button>
               </div>
-              <p>${item.price * item.quantity} </p>
-              <button className={styles.removeButton}
-                onClick={() => dispatch(removeFromCart(item.id))} >
+              <p>${(item.price * item.quantity).toFixed(2)} </p>
+              <button
+                className={styles.removeButton}
+                onClick={() => dispatch(removeFromCartAsync(item.id))}
+              >
                 Remove
               </button>
             </div>
@@ -53,7 +81,7 @@ function Cart() {
           <div className={styles.cartSummary}>
             <h2>Subtotal: ${total.toFixed(2)}</h2>
 
-            <Link to="/checkout" className={styles.primaryButton} >
+            <Link to="/checkout" className={styles.primaryButton}>
               Proceed to Checkout →
             </Link>
           </div>

@@ -7,17 +7,13 @@ import styles from "./Shop.module.css";
 
 export default function Categories() {
   const dispatch = useDispatch();
-
-  const { items, loading, error } = useSelector(
-    (state) => state.categories
-  );
+  const { items, loading, error } = useSelector((state) => state.categories);
 
   useEffect(() => {
     dispatch(fetchCategories());
   }, [dispatch]);
 
   if (loading) return <p>Loading categories...</p>;
-
   if (error) return <p>Unable to load categories: {error}</p>;
 
   return (
@@ -28,18 +24,16 @@ export default function Categories() {
       <div className={styles.categoryGrid}>
         {items.map((category) => (
           <div className={styles.categoryCard} key={category.id}>
-            <div className={styles.categoryIcon}>
-              {category.emoji}
-            </div>
+            <div className={styles.categoryIcon}>{category.emoji}</div>
 
             <h3>{category.name}</h3>
             <p>{category.description}</p>
-
             <p>{category.product_count} Products</p>
 
             <Link
               to={`/shop?categoryId=${category.id}`}
-              className={styles.primaryButton}  >
+              className={styles.primaryButton}
+            >
               Explore →
             </Link>
           </div>

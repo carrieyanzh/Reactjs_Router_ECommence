@@ -1,3 +1,5 @@
+import api from "../../api/api"; 
+
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
@@ -19,6 +21,38 @@ export default function Shop() {
   const categoryId = searchParams.get("categoryId");
   const { items, loading, error } = useSelector((state) => state.products);
   const [expandedId, setExpandedId] = useState(null);
+
+  const handleWishlistToggle = async (product) => {
+  const isSaved = wishlistItems.some((item) => item.id === product.id);
+
+  if (isSaved) {
+    try {
+      
+      await api.delete(`/api/wishlist/${product.id}`);
+      
+      dispatch(removeFromWishlist(product.id));
+    } catch (error) {
+      console.error("Error removing product from wishlist:", error);
+    }
+  } else {
+    try {
+      
+      await api.post("/api/wishlist", { 
+        product_id: product.id 
+      });
+      
+      dispatch(addToWishlist(product));
+    } catch (error) {
+      if (error.response && error.response.status === 409) {
+          console.warn("Product already exists in database wishlist. Synchronizing local state...");
+          dispatch(addToWishlist(product));
+        } else {
+          console.error("Unable to save product to database wishlist:", error);
+        }
+      
+    }
+  }
+};
 
   useEffect(() => {
     dispatch(fetchProducts(categoryId));
@@ -46,17 +80,8 @@ export default function Shop() {
           <div className={styles.categoryCard} key={product.id}>
             <div className={styles.categoryIcon}> {product.emoji || "🛍️"}</div>
             <button
-              className={styles.wishlistButton}
-              onClick={() => {
-                const isSaved = wishlistItems.some(
-                  (item) => item.id === product.id,    );
-
-                if (isSaved) {
-                  dispatch(removeFromWishlist(product.id));
-                } else {
-                  dispatch(addToWishlist(product));
-                }
-              }}
+              className={styles.wishlistButton}         
+               onClick={() => handleWishlistToggle(product)} 
               title="Add to Wishlist"   >
               {wishlistItems.some((item) => item.id === product.id)
                 ? "❤️"

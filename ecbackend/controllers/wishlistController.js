@@ -2,13 +2,12 @@ import db from "../db.js";
 
 
 export const getWishlist = async (req, res) => {
-  const userId = req.user?.id;
+  const userId = req.user?.id ? Number(req.user.id) : null;
 
   if (!userId) {
     return res.status(401).json({ message: "Unauthorized. Please log in first." });
   }
-
-  // ✅ Make sure p.id is selected cleanly so the frontend can map item.id
+  
   const sql = `
     SELECT
       w.id AS wishlist_id,
@@ -90,10 +89,15 @@ export const addToWishlist = async (req, res) => {
 
 export const removeFromWishlist = async (req, res) => {
   const userId = req.user?.id;
-  const { productId } = req.params;
+  //const { productId } = req.params;
+  const { product_id } = req.params; 
 
   if (!userId) {
     return res.status(401).json({ message: "Unauthorized." });
+  }
+  
+  if (!product_id || product_id === 'undefined') {
+    return res.status(400).json({ message: "Invalid Product ID provided." });
   }
 
   const sql = "DELETE FROM wishlist WHERE user_id = ? AND product_id = ?";
@@ -101,7 +105,8 @@ export const removeFromWishlist = async (req, res) => {
   try {
     const result = await db.execute({
       sql: sql,
-      args: [userId, productId]
+      //args: [userId, productId]
+      args: [userId, product_id] 
     });
     
     const changes = result.rowsAffected !== undefined ? result.rowsAffected : result.affectedRows;

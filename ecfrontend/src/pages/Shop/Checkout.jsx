@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { addOrder } from "../../features/orders/ordersSlice";
 import { clearCart } from "../../features/cart/cartSlice";
+import api from "../../api/api";
 import styles from "./Shop.module.css";
 
 function Checkout() {
@@ -10,6 +11,7 @@ function Checkout() {
   const navigate = useNavigate();
 
   const items = useSelector((state) => state.cart.items);
+  const [errorAlert, setErrorAlert] = useState("");
 
   const [customer, setCustomer] = useState({
     name: "",
@@ -26,25 +28,43 @@ function Checkout() {
     });
   };
 
-  const handleCheckout = (e) => {
+  const handleCheckout = async (e) => {
     e.preventDefault();
+    setErrorAlert("");
 
-    if (items.length === 0) {
-      return;
+    if (items.length === 0) return;
+
+    try {      
+      const backendItems = items.map(item => ({
+        id: item.id,
+        quantity: item.quantity
+      }));
+      
+      const response = await api.post("/api/orders", { 
+        items: backendItems 
+      });
+
+      const realOrderId = response.data.orderId;
+
+      const newOrder = {
+        id: realOrderId,
+        customer,
+        items: items,
+        total,
+        status: "Confirmed",
+        date: new Date().toISOString(),
+      };
+
+      
+      dispatch(addOrder(newOrder));
+      dispatch(clearCart());
+      navigate("/orders");
+    } catch (err) {
+      console.error("Failed to submit order to database:", err);
+      setErrorAlert(
+        err.response?.data?.message || "Stock deduction failed or network error occurred. Unable to generate order."
+      );
     }
-
-    const newOrder = {
-      id: Date.now(),
-      customer,
-      items: items,
-      total,
-      status: "Confirmed",
-      date: new Date().toLocaleString(),
-    };
-
-    dispatch(addOrder(newOrder));
-    dispatch(clearCart());
-    navigate("/orders");
   };
 
   if (items.length === 0) {
@@ -65,6 +85,8 @@ function Checkout() {
       <div className={styles.checkoutContainer}>
         <form onSubmit={handleCheckout}>
           <h2>Customer Information</h2>
+
+          {errorAlert && <p style={{ color: "red", fontWeight: "bold" }}>{errorAlert}</p>}
 
           <input type="text"
             name="name"

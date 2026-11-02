@@ -1,81 +1,122 @@
-/* Hero Section */
+.homeContainer {
+    background-color: #f6faf7;
+    font-family: 'Inter', -apple-system, sans-serif;
+    width: 100%;
+    box-sizing: border-box;
+    padding-bottom: 40px;
+}
+
 .hero {
-  min-height: 460px;
-  display: flex;
-  align-items: center;
-  padding: 60px 10%;
-  background: #f2f8f3;
-  margin: 0 !important; 
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    padding: 60px 10%;
+    gap: 40px;
+    background-color: #f6faf7;
 }
 
 .heroContent {
-  max-width: 600px;
+    width: 100%;
+}
+
+.tagline {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #5bbd76;
+    margin-bottom: 8px;
 }
 
 .hero h1 {
-  font-size: 48px;
-  line-height: 1.2;
-  margin-bottom: 20px;
-  color: #26332a;
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 1.3;
+    margin-bottom: 16px;
+    color: #1e2922;
 }
 
 .hero p {
-  font-size: 18px;
-  line-height: 1.7;
-  margin-bottom: 30px;
-  color: #68736b;
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+    color: #536156;
+}
+
+.heroVisual {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 100%;
+}
+
+.imageWrapper {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    z-index: 2;
+}
+
+.heroImage {
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    display: block !important;
 }
 
 .page {
-  padding: 5px 10%;         /* 💡 关键：左右保持 10% 的内边距，和 Explore 按钮完全对齐 */
-  background-color: #f2f8f3;  /* 如果想要纯白，保持 #ffffff；如果想要和上面一样带点浅绿，可以改成 #f2f8f3 */
-  display: flex;
-  flex-direction: column;
-  gap: 10px;             
+    padding: 40px 10% 20px 10%;
+    background-color: #f6faf7;
 }
 
-.page h1 {
-  font-size: 32px;
-  font-weight: 700;
-  color: #26332a;
+.page h2 {
+    font-size: 28px;
+    font-weight: 800;
+    color: #1e2922;
+    margin-bottom: 10px;
 }
 
 .page p {
-  color: #68736b;
-  font-size: 16px;  
+    color: #536156;
+    font-size: 15px;
 }
 
 .primaryButton {
-  display: inline-block;    /* 必须是 inline-block，否则 padding 会失效 */
-  background-color: #5bbd76;
-  color: #ffffff;
-  padding: 12px 22px;       /* 确保上下 12px，左右 22px 的饱满空间 */
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  text-decoration: none;    /* 去掉链接自带的下划线 */
-  transition: background 0.2s ease;
+    display: inline-block;
+    background-color: #5bbd76;
+    color: #ffffff;
+    padding: 12px 24px;
+    font-weight: 600;
+    font-size: 15px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(91, 189, 118, 0.25);
+    transition: all 0.3s ease;
 }
 
 .primaryButton:hover {
-  background-color: #419e5d; /* 悬停加深绿色 */
+    background-color: #419e5d;
+    transform: translateY(-2px);
 }
 
 .highlightText {
-  color: #5bbd76;       /* 标志性绿色 */
-  font-weight: bold;    /* 加粗展示 */
+    color: #5bbd76;
 }
-
 
 @media (max-width: 768px) {
-  .productGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
+    .hero {
+        grid-template-columns: 1fr;
+        text-align: center;
+        padding: 40px 5%;
+    }
 
-@media (max-width: 480px) {
-  .productGrid {
-    grid-template-columns: 1fr;
-  }
+    .heroVisual {
+        margin-top: 30px;
+    }
 }
-

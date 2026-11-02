@@ -19,7 +19,7 @@ function Profile() {
 
   return (
     <div className={styles.profileLayout}>
-      <aside className="profile-sidebar">
+      <aside className={styles.profileSidebar}>
         <h2>My Profile</h2>
 
         <nav className={styles.profileSidebarMenu}>

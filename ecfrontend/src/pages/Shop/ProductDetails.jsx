@@ -15,17 +15,35 @@ function ProductDetails() {
 
   useEffect(() => {
     const fetchProduct = async () => {
+      if (!id || id === 'undefined') {
+      console.warn("fetchProduct intercepted: URL parameter ID is missing.");
+      setProduct(false); // Keep state clear
+      return;
+    }  
       try {
         const response = await api.get(`/products/${id}`);
         setProduct(response.data);
       } catch (error) {
         console.error("Unable to load product:", error);
+         setProduct(false);
       }
     };
 
     fetchProduct();
   }, [id]);
 
+   if (product === null) {
+    return <p>Loading product...</p>;
+  }
+
+  if (product === false) {
+    return (
+      <div style={{ padding: "20px", textAlign: "center" }}>
+        <p style={{ color: "red", fontWeight: "bold" }}>Unable to load product details.</p>
+        <Link to="/shop">Return to Shop</Link>
+      </div>
+    );
+  }
   
   const handleAddToWishlist = async () => {
   if (!product) return;
