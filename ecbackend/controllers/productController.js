@@ -27,10 +27,9 @@ export const getProducts = async (req, res) => {
   }
 };
 
-// Get one product by ID
+
 export const getProductById = async (req, res) => {
   const { id } = req.params;
-
   const sql = "SELECT p.id, p.name, p.price, p.description, p.emoji, p.category_id, c.name AS category FROM products p JOIN categories c ON p.category_id = c.id WHERE p.id = ?";
 
   try {

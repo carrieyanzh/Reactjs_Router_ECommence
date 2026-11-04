@@ -31,7 +31,7 @@ function Orders() {
               <strong>Email:</strong> {user?.email || "N/A"}
             </p>
             <p>
-              <strong>Date:</strong> {new Date(order.date).toISOString()}
+              <strong>Date:</strong> {new Date(order.date).toLocaleString()}
             </p>
             <p>
               <strong>Status:</strong>{" "}

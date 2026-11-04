@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../api/api';
 
-// 🛠️ 1. Keep your asynchronous Thunks for the database sync
 export const updateCartQuantityAsync = createAsyncThunk(
   'cart/updateQuantityAsync',
   async ({ id, quantity }, { rejectWithValue }) => {
@@ -33,8 +32,7 @@ const cartSlice = createSlice({
     loading: false, 
     error: null 
   },
-  reducers: {
-    // 🛠️ 2. RESTORE: Add back the synchronous action used by Shop.jsx
+  reducers: {   
     addToCart: (state, action) => {
       const existingItem = state.items.find(item => item.id === action.payload.id);
       if (existingItem) {
@@ -43,11 +41,12 @@ const cartSlice = createSlice({
         state.items.push({ ...action.payload, quantity: 1 });
       }
     },
-    // 🛠️ 3. RESTORE: Fallback Redux actions used by Cart.jsx (needed for Plan A)
+    
     increaseQuantity: (state, action) => {
       const item = state.items.find(i => i.id === action.payload);
       if (item) item.quantity += 1;
     },
+    
     decreaseQuantity: (state, action) => {
       const item = state.items.find(i => i.id === action.payload);
       if (item && item.quantity > 1) item.quantity -= 1;
@@ -73,7 +72,6 @@ const cartSlice = createSlice({
   }
 });
 
-// 🛠️ 4. CRITICAL: Make sure everything is explicitly exported out
 export const { 
   addToCart, 
   increaseQuantity, 

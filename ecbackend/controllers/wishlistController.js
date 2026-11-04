@@ -1,6 +1,5 @@
 import db from "../db.js";
 
-
 export const getWishlist = async (req, res) => {
   const userId = req.user?.id ? Number(req.user.id) : null;
 
@@ -35,8 +34,6 @@ export const getWishlist = async (req, res) => {
     return res.status(500).json({ message: "Unable to retrieve wishlist" });
   }
 };
-
-
 
 export const addToWishlist = async (req, res) => {
   const userId = req.user?.id;
@@ -88,8 +85,7 @@ export const addToWishlist = async (req, res) => {
 };
 
 export const removeFromWishlist = async (req, res) => {
-  const userId = req.user?.id;
-  //const { productId } = req.params;
+  const userId = req.user?.id;  
   const { product_id } = req.params; 
 
   if (!userId) {

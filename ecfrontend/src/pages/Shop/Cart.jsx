@@ -3,8 +3,11 @@ import { Link } from "react-router-dom";
 import styles from "./Shop.module.css";
 
 import {
-  updateCartQuantityAsync,
-  removeFromCartAsync,
+  removeFromCart,
+  decreaseQuantity,
+  increaseQuantity,
+ // updateCartQuantityAsync,
+ // removeFromCartAsync,
 } from "../../features/cart/cartSlice";
 
 function Cart() {
@@ -41,14 +44,11 @@ function Cart() {
                 <button
                   onClick={() => {
                     if (item.quantity > 1) {
-                      dispatch(
-                        updateCartQuantityAsync({
-                          id: item.id,
-                          quantity: item.quantity - 1,
-                        }),
+                      dispatch(                     
+                        decreaseQuantity(item.id)
                       );
                     } else {
-                      dispatch(removeFromCartAsync(item.id));
+                      dispatch(decreaseQuantity(item.id));
                     }
                   }}
                 >
@@ -56,13 +56,8 @@ function Cart() {
                 </button>
                 <span>{item.quantity}</span>
                 <button
-                  onClick={() =>
-                    dispatch(
-                      updateCartQuantityAsync({
-                        id: item.id,
-                        quantity: item.quantity + 1,
-                      }),
-                    )
+                  onClick={() =>                   
+                   dispatch(increaseQuantity(item.id)) 
                   }
                 >
                   +
@@ -71,7 +66,7 @@ function Cart() {
               <p>${(item.price * item.quantity).toFixed(2)} </p>
               <button
                 className={styles.removeButton}
-                onClick={() => dispatch(removeFromCartAsync(item.id))}
+                onClick={() => dispatch(removeFromCart(item.id))}
               >
                 Remove
               </button>

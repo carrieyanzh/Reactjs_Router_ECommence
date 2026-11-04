@@ -6,11 +6,11 @@ import {
   deleteAddress,
   updateAddress 
 } from "../controllers/addressController.js";
+import authMiddleware from "../middleware/authMiddleware.js";
 
-//import authMiddleware from "../middleware/authMiddleware.js";
 const router = express.Router();
 
-//router.use(authMiddleware);
+router.use(authMiddleware);
 
 router.get("/", getAddresses);
 router.post("/", createAddress);

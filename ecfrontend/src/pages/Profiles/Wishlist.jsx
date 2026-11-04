@@ -7,7 +7,7 @@ function Wishlist() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(""); 
 
-  const { isAuthenticated, isAuthLoading } = useSelector((state) => state.auth);
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   const fetchWishlist = async () => {
     try {
@@ -29,12 +29,9 @@ function Wishlist() {
     } else {
       setLoading(false);
     }
-  }, [isAuthenticated, isAuthLoading]);
+  }, [isAuthenticated]);
 
-  if (isAuthLoading) {
-    return <p>Verifying authentication...</p>;
-  }
-
+ 
   if (!isAuthenticated && !loading) {
     return <p>Please log in to view your wishlist.</p>;
   }

@@ -107,3 +107,12 @@
 .login-footer a:hover {
   text-decoration: underline;
 }
+
+.login-page .login-notice {
+  background: #edf9f0;
+  color: #1f6b3a;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}

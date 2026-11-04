@@ -21,13 +21,17 @@ export const loginUser = createAsyncThunk(
 export const fetchCurrentUser = createAsyncThunk(
   "auth/me",
   async (_, { rejectWithValue }) => {
+    if (!localStorage.getItem("token")) return rejectWithValue("Not authenticated");
     try {
       const response = await api.get("/api/auth/me");
       return response.data.user;
-    } catch (error) {      
-      localStorage.removeItem('token');
-      localStorage.removeItem('persist:root'); // Clear layout persist on invalid sessions
-      return rejectWithValue("Not authenticated");
+    } catch (error) {
+      if (error.response?.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("persist:root");
+        return rejectWithValue("Not authenticated");
+      }
+      return rejectWithValue("Server unavailable"); // 后端暂时连不上：保留 Token
     }
   }
 );
@@ -39,8 +43,7 @@ export const logoutUser = createAsyncThunk(
       await api.post("/api/auth/logout");
     } catch (error) {
       console.warn("Backend logout endpoint failed, wiping local state anyway.");
-    } finally {
-      // ✅ Completely wipes out tokens and persisted redux cache states
+    } finally {      
       localStorage.removeItem('token');
       localStorage.removeItem('persist:root'); 
     }
@@ -89,10 +92,12 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.status = "succeeded";
       })
-      .addCase(fetchCurrentUser.rejected, (state) => {
-        state.user = null;
-        state.isAuthenticated = false;
+      .addCase(fetchCurrentUser.rejected, (state, action) => {
         state.status = "failed";
+        if (action.payload === "Not authenticated") {
+          state.user = null;
+          state.isAuthenticated = false;
+        } 
       })
       .addCase(logoutUser.pending, (state) => {
         state.status = "loading";

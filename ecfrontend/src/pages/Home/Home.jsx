@@ -19,9 +19,9 @@ function Home() {
       </section>
 
       <section className={styles.page}>
-        <h1>
+        <h2>
           Welcome to <span className={styles.highlightText}>Shopping</span>
-        </h1>
+        </h2>
         <p>Your destination for everyday shopping.</p>
       </section>
     </div>

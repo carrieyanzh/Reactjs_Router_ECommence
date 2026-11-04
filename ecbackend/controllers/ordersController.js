@@ -1,96 +1,83 @@
-import db from "../db.js";
+import db , { batch } from "../db.js";
 
 export const createOrder = async (req, res) => {
   const userId = req.user.id;
   const { items } = req.body;
 
-  if (!items || items.length === 0) {
+  if (!Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ message: "Order items are required." });
   }
-
-  // 🛠️ 1. 创建原生 Libsql 事务对象，由底层库来全权负责事务的安全周期
-  const tx = await db.transaction("write");
-
-  try {
-    let calculatedTotal = 0;
-    const verifiedItems = [];
-
-    // 逐个验证购物车中的商品单价与库存
-    for (const clientItem of items) {
-      // 🛠️ 注意：事务内的所有查询必须使用 tx.execute 而不是 db.execute
-      const productResult = await tx.execute({
-        sql: "SELECT price, stock, name FROM products WHERE id = ?",
-        args: [clientItem.id]
-      });
-
-      const productRow = productResult.rows[0];
-
-      if (!productRow) {
-        await tx.rollback(); // 发生错误自动安全回滚
-        return res.status(400).json({ message: `Product validation failed for item ID: ${clientItem.id}` });
-      }
-
-      if (productRow.stock < clientItem.quantity) {
-        await tx.rollback(); // 库存不足自动安全回滚
-        return res.status(400).json({ message: `Insufficient stock for product: ${productRow.name}. Available: ${productRow.stock}` });
-      }
-
-      calculatedTotal += productRow.price * clientItem.quantity;
-      verifiedItems.push({
-        id: clientItem.id,
-        quantity: clientItem.quantity,
-        price: productRow.price
-      });
+ 
+  const wanted = new Map();
+  for (const it of items) {
+    const id = Number(it.id);
+    const qty = Number(it.quantity);
+    if (!Number.isInteger(id) || !Number.isInteger(qty) || qty < 1) {
+      return res.status(400).json({ message: "Invalid item id or quantity." });
     }
+    wanted.set(id, (wanted.get(id) ?? 0) + qty);
+  }
 
-    // 插入订单主表记录
-    const orderInsertResult = await tx.execute({
-      sql: "INSERT INTO orders (user_id, total_amount, status) VALUES (?, ?, ?)",
-      args: [userId, calculatedTotal, "Confirmed"]
-    });
+  try {    
+    const ids = [...wanted.keys()];
+    const placeholders = ids.map(() => "?").join(",");
+    const { rows } = await db.execute(
+      `SELECT id, price, stock, name FROM products WHERE id IN (${placeholders})`,
+      ids
+    );
+    const byId = new Map(rows.map((r) => [r.id, r]));
 
-    const orderId = orderInsertResult.lastInsertRowid || orderInsertResult.insertId;
-
-    if (!orderId) {
-      await tx.rollback();
-      return res.status(500).json({ message: "Unable to save main order records." });
-    }
-
-    // 扣减库存并写入订单详情子表
-    for (const secureItem of verifiedItems) {
-      const stockUpdate = await tx.execute({
-        sql: "UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?",
-        args: [secureItem.quantity, secureItem.id, secureItem.quantity]
-      });
-
-      const changes = stockUpdate.rowsAffected !== undefined ? stockUpdate.rowsAffected : stockUpdate.affectedRows;
-      if (changes === 0) {
-        await tx.rollback();
-        return res.status(400).json({ message: `Stock deduction failed at last minute for product ID ${secureItem.id}.` });
+    let total = 0;
+    const verified = [];
+    for (const [id, qty] of wanted) {
+      const p = byId.get(id);
+      if (!p) {
+        return res.status(400).json({ message: `Product validation failed for item ID: ${id}` });
       }
-
-      await tx.execute({
-        sql: "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)",
-        args: [orderId, secureItem.id, secureItem.quantity, secureItem.price]
-      });
+      if (p.stock < qty) {
+        return res.status(400).json({
+          message: `Insufficient stock for product: ${p.name}. Available: ${p.stock}`,
+        });
+      }
+      total += p.price * qty;
+      verified.push({ id, qty, price: p.price });
     }
+    
+    const statements = [
+      {
+        sql: "INSERT INTO orders (user_id, total_amount, status) VALUES (?, ?, ?)",
+        params: [userId, total, "Confirmed"],
+      },
+      ...verified.flatMap((v) => [
+        // 守卫：库存不足时故意报错，整批回滚
+        {
+          sql: "SELECT CASE WHEN (SELECT stock FROM products WHERE id = ?) < ? THEN json('invalid') END",
+          params: [v.id, v.qty],
+        },
+        {
+          sql: "UPDATE products SET stock = stock - ? WHERE id = ?",
+          params: [v.qty, v.id],
+        },
+        {
+          sql: "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES ((SELECT MAX(id) FROM orders WHERE user_id = ?), ?, ?, ?)",
+          params: [userId, v.id, v.qty, v.price],
+        },
+      ]),
+    ];
 
-    // 🛠️ 2. 执行原生安全提交
-    await tx.commit();
+    const results = await batch(statements);
+    const orderId = results[0].meta.last_row_id;
 
     return res.status(201).json({
       message: "Order placed successfully! Inventory synchronized.",
-      orderId: orderId.toString(),
-      totalAmount: calculatedTotal
+      orderId: String(orderId),
+      totalAmount: total,
     });
-
   } catch (error) {
-    console.error("Order process system crash inside transaction:", error);
-    try {
-      // 🛠️ 3. 发生未知运行时异常时，执行安全闭环回滚
-      await tx.rollback();
-    } catch (e) {
-      // 防止重复回滚抛出二次异常
+    console.error("Create order error:", error.message);
+    const detail = JSON.stringify(error.response?.data?.errors ?? "");
+    if (detail.includes("JSON")) {
+      return res.status(409).json({ message: "Stock changed, please refresh your cart." });
     }
     return res.status(500).json({ message: "Internal server error during order creation." });
   }

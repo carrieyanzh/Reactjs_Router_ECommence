@@ -4,17 +4,26 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import api from "../../api/api";
 
-function ProfileOrders() {  
+function ProfileOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const { isAuthenticated } = useSelector((state) => state.auth);
 
+  const formatDate = (value) => {
+    if (!value) return "Unknown Date";    
+    const iso = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(value)
+      ? value.replace(" ", "T") + "Z"
+      : value;
+    const d = new Date(iso);
+    return isNaN(d.getTime()) ? "Unknown Date" : d.toLocaleString();
+  };
+
   useEffect(() => {
     const fetchMyOrders = async () => {
       try {
         setLoading(true);
-        const response = await api.get("/api/orders/my-orders");        
+        const response = await api.get("/api/orders/my-orders");
         setOrders(Array.isArray(response.data) ? response.data : []);
       } catch (err) {
         console.error("Fetch orders error:", err);
@@ -63,7 +72,7 @@ function ProfileOrders() {
           <p>
             Date:{" "}
             {order.date && !isNaN(Date.parse(order.date))
-              ? new Date(order.date).toISOString()
+              ? formatDate(order.date)
               : "Unknown Date"}
           </p>
           <p>

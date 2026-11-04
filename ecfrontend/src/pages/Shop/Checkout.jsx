@@ -54,7 +54,6 @@ function Checkout() {
         status: "Confirmed",
         date: new Date().toISOString(),
       };
-
       
       dispatch(addOrder(newOrder));
       dispatch(clearCart());
@@ -62,6 +61,7 @@ function Checkout() {
     } catch (err) {
       console.error("Failed to submit order to database:", err);
       setErrorAlert(
+        
         err.response?.data?.message || "Stock deduction failed or network error occurred. Unable to generate order."
       );
     }
